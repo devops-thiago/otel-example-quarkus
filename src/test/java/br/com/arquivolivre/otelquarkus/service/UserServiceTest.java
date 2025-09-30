@@ -1,30 +1,27 @@
 package br.com.arquivolivre.otelquarkus.service;
 
-import br.com.arquivolivre.otelquarkus.model.User;
-import br.com.arquivolivre.otelquarkus.repository.UserRepository;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import jakarta.inject.Inject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import br.com.arquivolivre.otelquarkus.model.User;
+import br.com.arquivolivre.otelquarkus.repository.UserRepository;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 @QuarkusTest
 class UserServiceTest {
 
-    @Inject
-    UserService userService;
+    @Inject UserService userService;
 
-    @InjectMock
-    UserRepository userRepository;
+    @InjectMock UserRepository userRepository;
 
     private User testUser;
 
@@ -49,7 +46,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testGetUserById_Found() {
+    void testGetUserByIdFound() {
         // Given
         when(userRepository.findByIdOptional(1L)).thenReturn(Optional.of(testUser));
 
@@ -63,7 +60,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testGetUserById_NotFound() {
+    void testGetUserByIdNotFound() {
         // Given
         when(userRepository.findByIdOptional(999L)).thenReturn(Optional.empty());
 
@@ -76,7 +73,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testGetUserByEmail_Found() {
+    void testGetUserByEmailFound() {
         // Given
         when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.of(testUser));
 
@@ -90,7 +87,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testGetUserByEmail_NotFound() {
+    void testGetUserByEmailNotFound() {
         // Given
         when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
@@ -102,14 +99,17 @@ class UserServiceTest {
     }
 
     @Test
-    void testCreateUser_Success() {
+    void testCreateUserSuccess() {
         // Given
         User newUser = new User("New User", "new@example.com", "New bio");
         when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
-        doAnswer(invocation -> {
-            newUser.id = 1L;  // Simulate ID assignment during persist
-            return null;
-        }).when(userRepository).persist(any(User.class));
+        doAnswer(
+                        invocation -> {
+                            newUser.id = 1L; // Simulate ID assignment during persist
+                            return null;
+                        })
+                .when(userRepository)
+                .persist(any(User.class));
 
         // When
         User result = userService.createUser(newUser);
@@ -122,7 +122,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testCreateUser_EmailExists() {
+    void testCreateUserEmailExists() {
         // Given
         when(userRepository.existsByEmail("john@example.com")).thenReturn(true);
 
@@ -130,13 +130,13 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.createUser(testUser))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Email already exists");
-        
+
         verify(userRepository).existsByEmail("john@example.com");
         verify(userRepository, never()).persist(any(User.class));
     }
 
     @Test
-    void testUpdateUser_Success() {
+    void testUpdateUserSuccess() {
         // Given
         User updatedData = new User("Updated Name", "updated@example.com", "Updated bio");
         when(userRepository.findByIdOptional(1L)).thenReturn(Optional.of(testUser));
@@ -154,7 +154,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testUpdateUser_NotFound() {
+    void testUpdateUserNotFound() {
         // Given
         when(userRepository.findByIdOptional(999L)).thenReturn(Optional.empty());
 
@@ -162,13 +162,13 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.updateUser(999L, testUser))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("User not found");
-        
+
         verify(userRepository).findByIdOptional(999L);
         verify(userRepository, never()).persist(any(User.class));
     }
 
     @Test
-    void testUpdateUser_EmailConflict() {
+    void testUpdateUserEmailConflict() {
         // Given
         User updatedData = new User("Updated", "conflict@example.com", "Bio");
         when(userRepository.findByIdOptional(1L)).thenReturn(Optional.of(testUser));
@@ -178,13 +178,13 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.updateUser(1L, updatedData))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Email already exists");
-        
+
         verify(userRepository).existsByEmailAndIdNot("conflict@example.com", 1L);
         verify(userRepository, never()).persist(any(User.class));
     }
 
     @Test
-    void testUpdateUser_SameEmail() {
+    void testUpdateUserSameEmail() {
         // Given
         User updatedData = new User("Updated Name", "john@example.com", "Updated bio");
         when(userRepository.findByIdOptional(1L)).thenReturn(Optional.of(testUser));
@@ -200,7 +200,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testDeleteUser_Success() {
+    void testDeleteUserSuccess() {
         // Given
         when(userRepository.deleteUser(1L)).thenReturn(true);
 
@@ -213,7 +213,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testDeleteUser_NotFound() {
+    void testDeleteUserNotFound() {
         // Given
         when(userRepository.deleteUser(999L)).thenReturn(false);
 

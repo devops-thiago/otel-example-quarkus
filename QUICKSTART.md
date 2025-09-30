@@ -68,14 +68,14 @@ otel-quarkus-crud/
 
 ## 🎯 Key Features
 
-✅ **Quarkus 3.17.5** - Fast startup (~1s), low memory (~50MB)  
-✅ **OpenTelemetry** - Auto + manual instrumentation  
-✅ **Hibernate Panache** - Simplified ORM  
-✅ **80%+ Test Coverage** - JUnit 5 + REST Assured  
-✅ **Full Observability** - Alloy, Tempo, Mimir, Loki, Grafana  
-✅ **PostgreSQL + H2** - Production & dev databases  
-✅ **CI/CD Ready** - GitHub Actions workflow  
-✅ **Docker Ready** - Multi-stage optimized builds  
+✅ **Quarkus 3.17.5** - Fast startup (~1s), low memory (~50MB)
+✅ **OpenTelemetry** - Auto + manual instrumentation
+✅ **Hibernate Panache** - Simplified ORM
+✅ **80%+ Test Coverage** - JUnit 5 + REST Assured
+✅ **Full Observability** - Alloy, Tempo, Mimir, Loki, Grafana
+✅ **PostgreSQL + H2** - Production & dev databases
+✅ **CI/CD Ready** - GitHub Actions workflow
+✅ **Docker Ready** - Multi-stage optimized builds
 
 ## 🔧 Development Commands
 

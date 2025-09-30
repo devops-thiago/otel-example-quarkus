@@ -21,9 +21,9 @@ common:
 schema_config:
   configs:
     - from: 2020-10-24
-      store: boltdb-shipper
+      store: tsdb
       object_store: s3
-      schema: v11
+      schema: v13
       index:
         prefix: index_
         period: 24h
@@ -45,7 +45,7 @@ table_manager:
   retention_period: 0s
 
 limits_config:
-  allow_structured_metadata: false
+  allow_structured_metadata: true
   reject_old_samples: true
   reject_old_samples_max_age: 168h
   ingestion_rate_mb: 4
@@ -54,4 +54,4 @@ limits_config:
   per_stream_rate_limit_burst: 15MB
 
 analytics:
-  reporting_enabled: false 
+  reporting_enabled: false

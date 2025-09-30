@@ -55,4 +55,4 @@ store_gateway:
 
 limits:
   ingestion_rate: 10000
-  ingestion_burst_size: 20000 
+  ingestion_burst_size: 20000

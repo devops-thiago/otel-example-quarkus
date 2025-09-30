@@ -1,23 +1,20 @@
 package br.com.arquivolivre.otelquarkus.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import br.com.arquivolivre.otelquarkus.model.User;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.*;
 
 @QuarkusTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserRepositoryTest {
 
-    @Inject
-    UserRepository userRepository;
+    @Inject UserRepository userRepository;
 
     @BeforeEach
     @Transactional
@@ -122,7 +119,7 @@ class UserRepositoryTest {
         // Given - Test finding users created in the last 1 day
         User recentUser = new User("Recent User", "recent@example.com", "Recent bio");
         userRepository.persist(recentUser);
-        
+
         // Flush to ensure persistence and wait a tiny bit
         userRepository.flush();
 

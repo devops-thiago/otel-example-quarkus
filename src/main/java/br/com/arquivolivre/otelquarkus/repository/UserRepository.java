@@ -3,20 +3,19 @@ package br.com.arquivolivre.otelquarkus.repository;
 import br.com.arquivolivre.otelquarkus.model.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository for User entity operations.
- * Uses Panache Repository pattern for database operations.
+ * Repository for User entity operations. Uses Panache Repository pattern for database operations.
  */
 @ApplicationScoped
 public class UserRepository implements PanacheRepository<User> {
 
     /**
      * Find user by email
+     *
      * @param email User's email address
      * @return Optional containing user if found
      */
@@ -26,6 +25,7 @@ public class UserRepository implements PanacheRepository<User> {
 
     /**
      * Search users by name (case-insensitive partial match)
+     *
      * @param name Name to search for
      * @return List of matching users
      */
@@ -35,6 +35,7 @@ public class UserRepository implements PanacheRepository<User> {
 
     /**
      * Find users created within the specified number of days
+     *
      * @param days Number of days to look back
      * @return List of recent users
      */
@@ -45,6 +46,7 @@ public class UserRepository implements PanacheRepository<User> {
 
     /**
      * Check if email already exists
+     *
      * @param email Email to check
      * @return true if email exists, false otherwise
      */
@@ -54,6 +56,7 @@ public class UserRepository implements PanacheRepository<User> {
 
     /**
      * Check if email exists for a different user (for update validation)
+     *
      * @param email Email to check
      * @param excludeId ID to exclude from check
      * @return true if email exists for a different user
@@ -64,6 +67,7 @@ public class UserRepository implements PanacheRepository<User> {
 
     /**
      * Count total number of users
+     *
      * @return Total user count
      */
     public long countUsers() {
@@ -72,6 +76,7 @@ public class UserRepository implements PanacheRepository<User> {
 
     /**
      * Delete user by ID
+     *
      * @param id User ID
      * @return true if deleted, false if not found
      */

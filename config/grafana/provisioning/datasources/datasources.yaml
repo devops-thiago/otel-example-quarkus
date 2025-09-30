@@ -67,7 +67,8 @@ datasources:
       maxLines: 1000
       derivedFields:
         - datasourceUid: tempo
-          matcherRegex: "\"traceid\":\"(\\w+)\""
+          matcherType: "label"
+          matcher: "trace_id"
           name: TraceID
           url: "$${__value.raw}"
-          urlDisplayLabel: 'View Trace' 
+          urlDisplayLabel: 'View Trace'

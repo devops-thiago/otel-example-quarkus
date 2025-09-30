@@ -55,4 +55,4 @@ query_frontend:
     duration_slo: 5s
 
 querier:
-  max_concurrent_queries: 20 
+  max_concurrent_queries: 20
