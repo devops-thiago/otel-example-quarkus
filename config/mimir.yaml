@@ -1,0 +1,58 @@
+target: all
+
+server:
+  http_listen_port: 9009
+
+multitenancy_enabled: false
+
+blocks_storage:
+  backend: s3
+  s3:
+    endpoint: minio:9000
+    bucket_name: mimir-data
+    access_key_id: admin
+    secret_access_key: password123
+    insecure: true
+
+compactor:
+  data_dir: /tmp/mimir-compactor
+
+distributor:
+  pool:
+    health_check_ingesters: true
+
+ingester:
+  ring:
+    replication_factor: 1
+
+ruler:
+  rule_path: /tmp/mimir-ruler
+
+ruler_storage:
+  backend: s3
+  s3:
+    endpoint: minio:9000
+    bucket_name: ruler-data
+    access_key_id: admin
+    secret_access_key: password123
+    insecure: true
+
+alertmanager:
+  data_dir: /tmp/mimir-alertmanager
+
+alertmanager_storage:
+  backend: s3
+  s3:
+    endpoint: minio:9000
+    bucket_name: alertmanager-data
+    access_key_id: admin
+    secret_access_key: password123
+    insecure: true
+
+store_gateway:
+  sharding_ring:
+    replication_factor: 1
+
+limits:
+  ingestion_rate: 10000
+  ingestion_burst_size: 20000
