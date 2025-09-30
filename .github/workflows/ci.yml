@@ -70,6 +70,7 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
+        slug: devops-thiago/otel-example-quarkus
 
     - name: Check coverage thresholds
       run: mvn jacoco:check
