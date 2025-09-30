@@ -1,0 +1,207 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: userdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 20s
+      retries: 10
+    networks:
+      - otel-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.native
+    container_name: quarkus-otel-app-native
+    restart: always
+    environment:
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:mysql://mysql:3306/userdb
+      QUARKUS_DATASOURCE_USERNAME: user
+      QUARKUS_DATASOURCE_PASSWORD: password
+      QUARKUS_DATASOURCE_DB_KIND: mysql
+      QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4320
+      QUARKUS_OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      QUARKUS_LOG_CONSOLE_FORMAT: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p traceId=%X{traceId}, spanId=%X{spanId}, sampled=%X{sampled} [%c{3.}] (%t) %s%e%n"
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      alloy:
+        condition: service_started
+    networks:
+      - otel-network
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - otel-network
+
+  minio-setup:
+    image: quay.io/minio/mc:latest
+    container_name: minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set minio http://minio:9000 admin password123;
+      /usr/bin/mc mb minio/tempo-data;
+      /usr/bin/mc mb minio/mimir-data;
+      /usr/bin/mc mb minio/loki-data;
+      /usr/bin/mc mb minio/ruler-data;
+      /usr/bin/mc mb minio/alertmanager-data;
+      exit 0;
+      "
+    networks:
+      - otel-network
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    command:
+      - "-config.file=/etc/tempo.yaml"
+    volumes:
+      - ./config/tempo.yaml:/etc/tempo.yaml
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3200/ready"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      minio-setup:
+        condition: service_completed_successfully
+    networks:
+      - otel-network
+
+  mimir:
+    image: grafana/mimir-alpine:latest
+    container_name: mimir
+    ports:
+      - "9009:9009"
+    command:
+      - "-config.file=/etc/mimir.yaml"
+    volumes:
+      - ./config/mimir.yaml:/etc/mimir.yaml
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9009/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      minio-setup:
+        condition: service_completed_successfully
+    networks:
+      - otel-network
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command:
+      - "-config.file=/etc/loki.yaml"
+    volumes:
+      - ./config/loki.yaml:/etc/loki.yaml
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      minio-setup:
+        condition: service_completed_successfully
+    networks:
+      - otel-network
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    ports:
+      - "12345:12345"
+      - "4320:4320"
+      - "4321:4321"
+      - "9464:9464"
+    command:
+      - "run"
+      - "/etc/alloy/config.alloy"
+      - "--server.http.listen-addr=0.0.0.0:12345"
+      - "--storage.path=/var/lib/alloy/data"
+    volumes:
+      - ./config/alloy.alloy:/etc/alloy/config.alloy
+      - alloy_data:/var/lib/alloy/data
+    depends_on:
+      tempo:
+        condition: service_healthy
+      mimir:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    networks:
+      - otel-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      tempo:
+        condition: service_healthy
+      mimir:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    networks:
+      - otel-network
+
+volumes:
+  mysql_data:
+  minio_data:
+  alloy_data:
+  grafana_data:
+
+networks:
+  otel-network:
+    driver: bridge

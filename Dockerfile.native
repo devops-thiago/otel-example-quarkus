@@ -1,0 +1,79 @@
+# Multi-stage Dockerfile for Quarkus Native Application with GraalVM
+# Stage 1: Build stage with GraalVM
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21 AS build
+
+# Set working directory
+WORKDIR /app
+
+# Copy Maven wrapper and configuration files
+COPY --chown=quarkus:quarkus mvnw* ./
+COPY --chown=quarkus:quarkus .mvn .mvn
+COPY --chown=quarkus:quarkus pom.xml .
+
+# Download dependencies (cached layer if pom.xml hasn't changed)
+RUN ./mvnw dependency:go-offline -B 2>/dev/null || mvn dependency:go-offline -B
+
+# Copy source code
+COPY --chown=quarkus:quarkus src ./src
+
+# Build native executable
+# -Dquarkus.native.additional-build-args adds support for OpenTelemetry in native mode
+RUN ./mvnw package -Pnative -DskipTests -B \
+    -Dquarkus.native.additional-build-args="\
+--initialize-at-build-time=org.slf4j.LoggerFactory,\
+--initialize-at-build-time=org.slf4j.simple.SimpleLogger,\
+--initialize-at-build-time=org.slf4j.impl.StaticLoggerBinder,\
+-H:+ReportExceptionStackTraces,\
+-H:IncludeResources=.*\\.properties$,\
+-H:IncludeResources=.*\\.xml$,\
+-H:IncludeResources=.*\\.sql$" \
+    2>/dev/null || \
+    mvn package -Pnative -DskipTests -B \
+    -Dquarkus.native.additional-build-args="\
+--initialize-at-build-time=org.slf4j.LoggerFactory,\
+--initialize-at-build-time=org.slf4j.simple.SimpleLogger,\
+--initialize-at-build-time=org.slf4j.impl.StaticLoggerBinder,\
+-H:+ReportExceptionStackTraces,\
+-H:IncludeResources=.*\\.properties$,\
+-H:IncludeResources=.*\\.xml$,\
+-H:IncludeResources=.*\\.sql$"
+
+# Verify the native executable
+RUN ls -lh target/*-runner
+
+# Stage 2: Runtime stage - minimal container
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5
+
+# Install required runtime libraries
+RUN microdnf install -y shadow-utils && \
+    microdnf clean all && \
+    groupadd -r appuser -g 1000 && \
+    useradd -u 1000 -r -g appuser -m -s /sbin/nologin appuser
+
+# Set working directory
+WORKDIR /app
+
+# Copy the native executable from build stage
+COPY --from=build --chown=appuser:appuser /app/target/*-runner /app/application
+
+# Create directories for logs
+RUN mkdir -p /app/logs && \
+    chown -R appuser:appuser /app && \
+    chmod +x /app/application
+
+# Switch to non-root user
+USER appuser
+
+# Expose the application port
+EXPOSE 8080
+
+# Environment variables
+ENV QUARKUS_HTTP_HOST=0.0.0.0
+
+# Health check (using cat instead of curl since this is a minimal image)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD test -f /proc/1/cmdline || exit 1
+
+# Run the native application
+ENTRYPOINT ["./application"]
+CMD ["-Dquarkus.http.host=0.0.0.0"]

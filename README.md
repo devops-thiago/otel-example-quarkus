@@ -2,7 +2,7 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/devops-thiago/otel-example-quarkus/ci.yml?branch=main&label=CI)](https://github.com/devops-thiago/otel-example-quarkus/actions)
 [![Java Version](https://img.shields.io/badge/java-21-007396?logo=openjdk)](https://openjdk.org)
-[![Quarkus](https://img.shields.io/badge/Quarkus-3.17.5-4695EB?logo=quarkus)](https://quarkus.io)
+[![Quarkus](https://img.shields.io/badge/Quarkus-3.28.1-4695EB?logo=quarkus)](https://quarkus.io)
 [![License](https://img.shields.io/github/license/devops-thiago/otel-example-quarkus)](LICENSE)
 [![Codecov](https://img.shields.io/codecov/c/github/devops-thiago/otel-example-quarkus?label=coverage)](https://app.codecov.io/gh/devops-thiago/otel-example-quarkus)
 [![Sonar Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=devops-thiago_otel-example-quarkus&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=devops-thiago_otel-example-quarkus)

@@ -120,31 +120,10 @@
             <artifactId>quarkus-opentelemetry</artifactId>
         </dependency>
 
-        <!-- OpenTelemetry Logging Exporter -->
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-logging</artifactId>
-        </dependency>
-
-        <!-- OpenTelemetry JDBC Datasource Instrumentation -->
-        <dependency>
-            <groupId>io.opentelemetry.instrumentation</groupId>
-            <artifactId>opentelemetry-jdbc</artifactId>
-            <version>2.20.1-alpha</version>
-            <scope>runtime</scope>
-        </dependency>
-
         <!-- Logging JSON format -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-logging-json</artifactId>
-        </dependency>
-
-        <!-- OpenTelemetry Logging Exporter -->
-        <dependency>
-            <groupId>io.opentelemetry.instrumentation</groupId>
-            <artifactId>opentelemetry-logback-appender-1.0</artifactId>
-            <version>2.20.1-alpha</version>
         </dependency>
 
         <!-- OpenAPI/Swagger -->
