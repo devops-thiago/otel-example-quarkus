@@ -1,0 +1,31 @@
+# Maven
+target/
+.mvn/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+README.md
+
+# Config (already in image)
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store

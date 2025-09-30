@@ -1,0 +1,200 @@
+services:
+  # MinIO - Object Storage for Tempo, Mimir, and Loki
+  minio:
+    image: quay.io/minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password123
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - observability
+
+  # MinIO bucket setup
+  minio-setup:
+    image: quay.io/minio/mc:latest
+    container_name: minio-setup
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set minio http://minio:9000 admin password123;
+      /usr/bin/mc mb minio/tempo-data;
+      /usr/bin/mc mb minio/mimir-data;
+      /usr/bin/mc mb minio/loki-data;
+      /usr/bin/mc mb minio/ruler-data;
+      /usr/bin/mc mb minio/alertmanager-data;
+      exit 0;
+      "
+    networks:
+      - observability
+
+  # Grafana Tempo - Distributed Tracing
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    ports:
+      - "3200:3200"
+      - "4317:4317"  # OTLP gRPC
+      - "4318:4318"  # OTLP HTTP
+    command:
+      - "-config.file=/etc/tempo.yaml"
+    volumes:
+      - ./config/tempo.yaml:/etc/tempo.yaml
+    depends_on:
+      - minio-setup
+    networks:
+      - observability
+
+  # Grafana Mimir - Metrics Storage
+  mimir:
+    image: grafana/mimir:latest
+    container_name: mimir
+    ports:
+      - "9009:9009"
+    command:
+      - "-config.file=/etc/mimir.yaml"
+    volumes:
+      - ./config/mimir.yaml:/etc/mimir.yaml
+    depends_on:
+      - minio-setup
+    networks:
+      - observability
+
+  # Grafana Loki - Log Storage
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command:
+      - "-config.file=/etc/loki.yaml"
+    volumes:
+      - ./config/loki.yaml:/etc/loki.yaml
+    depends_on:
+      - minio-setup
+    networks:
+      - observability
+
+  # Grafana Alloy - Telemetry Collection
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    ports:
+      - "12345:12345"  # Alloy UI
+      - "4320:4320"    # OTLP gRPC receiver
+      - "4321:4321"    # OTLP HTTP receiver
+      - "9464:9464"    # Prometheus metrics
+    command:
+      - "run"
+      - "/etc/alloy/config.alloy"
+      - "--server.http.listen-addr=0.0.0.0:12345"
+      - "--storage.path=/var/lib/alloy/data"
+    volumes:
+      - ./config/alloy.alloy:/etc/alloy/config.alloy
+      - alloy_data:/var/lib/alloy/data
+    depends_on:
+      - tempo
+      - mimir
+      - loki
+    networks:
+      - observability
+
+  # Grafana - Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - tempo
+      - mimir
+      - loki
+    networks:
+      - observability
+
+  # PostgreSQL Database (for production mode)
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=quarkus_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - observability
+
+  # Quarkus CRUD API Application
+  otel-quarkus-crud:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: otel-quarkus-crud
+    ports:
+      - "8080:8080"
+    environment:
+      # Database Configuration
+      - QUARKUS_DATASOURCE_DB_KIND=postgresql
+      - QUARKUS_DATASOURCE_USERNAME=postgres
+      - QUARKUS_DATASOURCE_PASSWORD=postgres
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://postgres:5432/quarkus_db
+      - QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION=update
+      - QUARKUS_HIBERNATE_ORM_SQL_LOAD_SCRIPT=import.sql
+      
+      # OpenTelemetry Configuration
+      - QUARKUS_OTEL_ENABLED=true
+      - QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://alloy:4320
+      - QUARKUS_OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://alloy:4320
+      - QUARKUS_OTEL_RESOURCE_ATTRIBUTES=service.name=otel-quarkus-crud,service.version=1.0.0,deployment.environment=docker
+      
+      # Logging
+      - QUARKUS_LOG_CONSOLE_JSON=true
+      - QUARKUS_LOG_LEVEL=INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+      alloy:
+        condition: service_started
+    networks:
+      - observability
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  minio_data:
+  alloy_data:
+  grafana_data:
+  postgres_data:
+
+networks:
+  observability:
+    driver: bridge

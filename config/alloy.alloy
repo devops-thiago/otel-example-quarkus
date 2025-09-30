@@ -1,0 +1,94 @@
+// Alloy configuration for collecting metrics, traces and logs
+// This config sets up OTLP receivers and forwards to Tempo, Mimir, and Loki
+
+// OTLP receiver for traces
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4320"
+  }
+  
+  http {
+    endpoint = "0.0.0.0:4321"
+  }
+
+  output {
+    metrics = [otelcol.processor.batch.default.input]
+    logs    = [otelcol.processor.batch.default.input]
+    traces  = [otelcol.processor.batch.default.input]
+  }
+}
+
+// Batch processor for efficiency
+otelcol.processor.batch "default" {
+  output {
+    metrics = [otelcol.exporter.prometheus.default.input]
+    logs    = [otelcol.exporter.loki.default.input]
+    traces  = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+// Export traces to Tempo
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "http://tempo:4317"
+    tls {
+      insecure = true
+    }
+  }
+}
+
+// Export metrics to Mimir (via Prometheus remote write)
+otelcol.exporter.prometheus "default" {
+  forward_to = [prometheus.remote_write.mimir.receiver]
+}
+
+// Export logs to Loki
+otelcol.exporter.loki "default" {
+  forward_to = [loki.write.default.receiver]
+}
+
+// Prometheus remote write to Mimir
+prometheus.remote_write "mimir" {
+  endpoint {
+    url = "http://mimir:9009/api/v1/push"
+  }
+}
+
+// Loki write
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// Scrape Alloy's own metrics
+prometheus.scrape "alloy" {
+  targets = [{"__address__" = "localhost:12345"}]
+  forward_to = [prometheus.remote_write.mimir.receiver]
+}
+
+// Scrape application metrics from containerized app
+prometheus.scrape "app" {
+  targets = [{"__address__" = "otel-quarkus-crud:8080"}]
+  metrics_path = "/q/metrics"
+  scrape_interval = "15s"
+  forward_to = [prometheus.remote_write.mimir.receiver]
+}
+
+// Log collection from application (if using structured logging)
+loki.source.file "app_logs" {
+  targets = [
+    {
+      __path__ = "/var/log/app/*.log",
+      job = "otel-crud-api",
+      environment = "development",
+    },
+  ]
+  forward_to = [loki.write.default.receiver]
+}
+
+// Logging configuration
+logging {
+  level = "info"
+  format = "logfmt"
+} 
