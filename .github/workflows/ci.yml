@@ -65,12 +65,11 @@ jobs:
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5
       with:
-        files: ./target/site/jacoco/jacoco.xml
+        file: ./target/site/jacoco/jacoco.xml
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
-        verbose: true
 
     - name: Check coverage thresholds
       run: mvn jacoco:check
@@ -163,8 +162,8 @@ jobs:
         context: .
         push: true
         tags: |
-          ${{ secrets.DOCKER_USERNAME }}/otel-quarkus-crud:latest
-          ${{ secrets.DOCKER_USERNAME }}/otel-quarkus-crud:${{ github.sha }}
+          ${{ secrets.DOCKER_USERNAME }}/otel-crud-api-quarkus:latest
+          ${{ secrets.DOCKER_USERNAME }}/otel-crud-api-quarkus:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
