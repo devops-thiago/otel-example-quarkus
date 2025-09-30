@@ -23,7 +23,7 @@
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.version>3.17.5</quarkus.version>
         <compiler-plugin.version>3.14.1</compiler-plugin.version>
-        <surefire-plugin.version>3.5.2</surefire-plugin.version>
+        <surefire-plugin.version>3.5.4</surefire-plugin.version>
         <jacoco.version>0.8.13</jacoco.version>
 
         <!-- SonarCloud Configuration -->
