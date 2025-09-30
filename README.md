@@ -1,297 +1,191 @@
-# OpenTelemetry Quarkus CRUD API
+# OpenTelemetry Quarkus Example
 
-[![CI/CD Pipeline](https://github.com/devops-thiago/otel-quarkus-crud/actions/workflows/ci.yml/badge.svg)](https://github.com/devops-thiago/otel-quarkus-crud/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/devops-thiago/otel-quarkus-crud/branch/main/graph/badge.svg)](https://codecov.io/gh/devops-thiago/otel-quarkus-crud)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
-[![Quarkus](https://img.shields.io/badge/Quarkus-3.17.5-blue.svg)](https://quarkus.io/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://hub.docker.com/)
-[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Enabled-blueviolet.svg)](https://opentelemetry.io/)
+[![CI](https://img.shields.io/github/actions/workflow/status/devops-thiago/otel-example-quarkus/ci.yml?branch=main&label=CI)](https://github.com/devops-thiago/otel-example-quarkus/actions)
+[![Java Version](https://img.shields.io/badge/java-21-007396?logo=openjdk)](https://openjdk.org)
+[![Quarkus](https://img.shields.io/badge/Quarkus-3.17.5-4695EB?logo=quarkus)](https://quarkus.io)
+[![License](https://img.shields.io/github/license/devops-thiago/otel-example-quarkus)](LICENSE)
+[![Codecov](https://img.shields.io/codecov/c/github/devops-thiago/otel-example-quarkus?label=coverage)](https://app.codecov.io/gh/devops-thiago/otel-example-quarkus)
+[![Sonar Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=devops-thiago_otel-example-quarkus&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=devops-thiago_otel-example-quarkus)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=devops-thiago_otel-example-quarkus&metric=coverage)](https://sonarcloud.io/summary/new_code?id=devops-thiago_otel-example-quarkus)
+[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-enabled-blue?logo=opentelemetry)](https://opentelemetry.io)
+[![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)](https://www.docker.com)
+[![Docker Hub](https://img.shields.io/docker/v/thiagosg/otel-crud-api-quarkus?logo=docker&label=Docker%20Hub)](https://hub.docker.com/r/thiagosg/otel-crud-api-quarkus)
+[![Docker Pulls](https://img.shields.io/docker/pulls/thiagosg/otel-crud-api-quarkus)](https://hub.docker.com/r/thiagosg/otel-crud-api-quarkus)
 
-A comprehensive Quarkus REST API demonstrating complete CRUD operations with full OpenTelemetry integration and enterprise-grade observability stack for distributed tracing, metrics, and log aggregation.
-
-## 🚀 Features
-
-- **Complete CRUD Operations**: Full Create, Read, Update, Delete functionality for User entities
-- **Quarkus Framework**: Supersonic Subatomic Java with fast startup and low memory footprint
-- **OpenTelemetry Integration**: Automatic and manual instrumentation for distributed tracing
-- **Hibernate Panache**: Simplified data access layer with active record pattern
-- **Full Observability Stack**: Grafana Alloy, Tempo, Mimir, Loki, and Grafana
-- **RESTEasy Reactive**: Non-blocking REST endpoints with JAX-RS annotations
-- **80%+ Code Coverage**: Comprehensive unit and integration tests
-- **PostgreSQL & H2**: Production-ready database with H2 for development
-- **Bean Validation**: Input validation using Jakarta Bean Validation
-- **Health Checks**: SmallRye Health for monitoring
-- **Prometheus Metrics**: Micrometer with Prometheus registry
-- **OpenAPI/Swagger**: Interactive API documentation
-- **Docker Support**: Multi-stage builds optimized for production
-- **CI/CD Pipeline**: GitHub Actions with automated testing and deployment
+A production-ready Quarkus REST API with comprehensive OpenTelemetry instrumentation, featuring distributed tracing, metrics collection, and structured logging. Built with clean architecture principles and designed for cloud-native deployments.
 
 ## 📋 Table of Contents
 
-- [Technologies Used](#technologies-used)
-- [Architecture Overview](#architecture-overview)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Deployment Options](#deployment-options)
 - [API Documentation](#api-documentation)
-- [Testing](#testing)
+- [Configuration](#configuration)
 - [Observability](#observability)
-- [Docker Deployment](#docker-deployment)
-- [CI/CD](#cicd)
+- [Development](#development)
+- [Testing](#testing)
 - [Contributing](#contributing)
 
-## 🛠 Technologies Used
+## ✨ Features
 
-### Core Framework
-- **Java 21** - Latest LTS version with modern language features
-- **Quarkus 3.17.5** - Supersonic Subatomic Java Framework
-- **Maven** - Dependency management and build tool
+- **🚀 Quarkus Framework** - Supersonic Subatomic Java with fast startup times
+- **📊 Full Observability** - Distributed tracing, metrics, and structured logging
+- **🔌 OpenTelemetry Native** - Built-in OTLP exporter support for traces, metrics, and logs
+- **🏗️ Clean Architecture** - Repository pattern with Panache for simplified data access
+- **🐳 Docker Ready** - Multi-stage Dockerfile with security best practices
+- **🔒 Security First** - Non-root user, minimal attack surface, vulnerability scanning
+- **🧪 Well Tested** - Comprehensive test coverage with JUnit 5 and REST-assured
+- **📝 API Documentation** - OpenAPI/Swagger UI automatically generated
+- **💾 MySQL Integration** - JDBC with full OpenTelemetry instrumentation
+- **⚡ Fast Startup** - Sub-second startup time in JVM mode
 
-### Data Layer
-- **Hibernate ORM with Panache** - Simplified persistence layer
-- **PostgreSQL 17** - Production database
-- **H2 Database** - In-memory database for development and testing
+## 📚 Prerequisites
 
-### Observability
-- **OpenTelemetry** - Distributed tracing and metrics
-- **Grafana Alloy** - Telemetry data collector
-- **Grafana Tempo** - Distributed tracing backend
-- **Grafana Mimir** - Prometheus-compatible metrics storage
-- **Grafana Loki** - Log aggregation system
-- **Grafana** - Visualization and dashboarding
-- **MinIO** - S3-compatible object storage
+- Java 21+ (for local development)
+- Maven 3.9+
+- Docker & Docker Compose
+- MySQL 8.0+ (or use the provided docker-compose)
+- OpenTelemetry Collector (optional - included in full setup)
 
-### REST & Validation
-- **RESTEasy Reactive** - Reactive REST endpoints
-- **Jakarta REST (JAX-RS)** - Standard REST annotations
-- **Hibernate Validator** - Bean validation
-- **Jackson** - JSON processing
+## 🚀 Quick Start
 
-### Testing
-- **JUnit 5** - Testing framework
-- **REST Assured** - REST API testing
-- **Mockito** - Mocking framework
-- **AssertJ** - Fluent assertions
-- **JaCoCo** - Code coverage analysis
-
-### DevOps
-- **Docker & Docker Compose** - Containerization
-- **GitHub Actions** - CI/CD pipeline
-- **Codecov** - Coverage reporting
-
-## 🏗 Architecture Overview
-
-### Application Architecture
-```
-┌──────────────┐
-│   Client     │
-└──────┬───────┘
-       │ HTTP/REST
-┌──────▼───────────────┐
-│   UserResource       │  (JAX-RS REST Endpoints)
-│   (REST Layer)       │
-└──────┬───────────────┘
-       │
-┌──────▼───────────────┐
-│   UserService        │  (Business Logic + OpenTelemetry)
-│   (Service Layer)    │
-└──────┬───────────────┘
-       │
-┌──────▼───────────────┐
-│  UserRepository      │  (Panache Repository)
-│  (Data Layer)        │
-└──────┬───────────────┘
-       │
-┌──────▼───────────────┐
-│  PostgreSQL/H2       │  (Database)
-└──────────────────────┘
-```
-
-### Observability Stack
-```
-┌────────────────┐
-│ Quarkus App    │
-└───────┬────────┘
-        │ OTLP (gRPC/HTTP)
-        ▼
-┌───────────────────┐
-│  Grafana Alloy    │  (Collector)
-└───┬───────┬───┬───┘
-    │       │   │
-    ▼       ▼   ▼
-┌──────┐ ┌──────┐ ┌──────┐
-│Tempo │ │Mimir │ │Loki  │  (Storage Backends)
-└───┬──┘ └───┬──┘ └───┬──┘
-    │        │        │
-    └────────┴────────┴─────► MinIO (S3 Storage)
-                      │
-                      ▼
-              ┌───────────────┐
-              │    Grafana    │  (Visualization)
-              └───────────────┘
-```
-
-## 📁 Project Structure
-
-```
-otel-quarkus-crud/
-├── src/
-│   ├── main/
-│   │   ├── java/br/com/arquivolivre/otelquarkus/
-│   │   │   ├── model/
-│   │   │   │   └── User.java                    # Entity with Panache
-│   │   │   ├── repository/
-│   │   │   │   └── UserRepository.java         # Data access layer
-│   │   │   ├── service/
-│   │   │   │   └── UserService.java            # Business logic + tracing
-│   │   │   └── resource/
-│   │   │       └── UserResource.java           # REST endpoints
-│   │   └── resources/
-│   │       ├── application.properties          # Configuration
-│   │       └── import.sql                      # Sample data
-│   └── test/
-│       └── java/                               # Comprehensive tests
-├── config/
-│   ├── alloy.alloy                            # Alloy configuration
-│   ├── tempo.yaml                             # Tempo configuration
-│   ├── mimir.yaml                             # Mimir configuration
-│   ├── loki.yaml                              # Loki configuration
-│   └── grafana/                               # Grafana provisioning
-├── .github/workflows/
-│   └── ci.yml                                 # CI/CD pipeline
-├── docker-compose.yml                         # Full stack deployment
-├── Dockerfile                                 # Multi-stage build
-└── pom.xml                                    # Maven configuration
-```
-
-## 🚦 Getting Started
-
-### Prerequisites
-
-- **Java 21** or higher
-- **Maven 3.6+**
-- **Docker and Docker Compose** (for full observability stack)
-- **PostgreSQL 17** (optional, H2 used by default in dev mode)
-
-### Option 1: Quick Start (Development Mode)
-
-Quarkus Dev Mode provides live reload and H2 console:
+### Option 1: Full Stack (App + Database + Observability)
 
 ```bash
 # Clone the repository
-git clone https://github.com/devops-thiago/otel-quarkus-crud.git
-cd otel-quarkus-crud
+git clone https://github.com/devops-thiago/otel-example-quarkus.git
+cd otel-example-quarkus
 
-# Run in development mode
-./mvnw quarkus:dev
+# Start everything with docker-compose
+docker-compose up -d
+
+# Check if services are running
+docker-compose ps
 ```
 
-Access points:
-- **API**: http://localhost:8080/api/users
-- **Swagger UI**: http://localhost:8080/q/swagger-ui
-- **Health**: http://localhost:8080/q/health
-- **Metrics**: http://localhost:8080/q/metrics
-- **Dev UI**: http://localhost:8080/q/dev
+**Access points:**
+- API: http://localhost:8080
+- API Docs (Swagger): http://localhost:8080/q/swagger-ui
+- Health: http://localhost:8080/q/health
+- Metrics: http://localhost:8080/q/metrics
+- Grafana: http://localhost:3000 (admin/admin)
+- Alloy UI: http://localhost:12345
 
-### Option 2: Package and Run
+### Option 2: Run Locally
 
 ```bash
-# Build the application
-./mvnw clean package
+# Install dependencies and run in dev mode
+./mvnw quarkus:dev
 
-# Run the JAR
+# Or build and run
+./mvnw clean package
 java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-### Option 3: Full Observability Stack
+## 🚢 Deployment Options
+
+### Using Your Own OpenTelemetry Collector
+
+If you already have an OpenTelemetry infrastructure:
 
 ```bash
-# Start the complete stack
-docker compose up -d
-
-# Check services status
-docker compose ps
+# Use the app-only compose file
+docker-compose -f docker-compose.app-only.yml up -d
 ```
 
-Access points:
-- **Application**: http://localhost:8080
-- **Swagger UI**: http://localhost:8080/q/swagger-ui
-- **Grafana**: http://localhost:3000 (admin/admin)
-- **Alloy UI**: http://localhost:12345
-- **MinIO Console**: http://localhost:9001 (admin/password123)
+**Required environment variables:**
+```bash
+# OpenTelemetry Configuration
+OTEL_EXPORTER_OTLP_ENDPOINT=your-collector:4320
+OTEL_SERVICE_NAME=otel-quarkus-crud
 
-## 📚 API Documentation
-
-### Base URL
-```
-http://localhost:8080/api/users
-```
-
-### Endpoints
-
-#### 1. Get All Users
-```http
-GET /api/users
+# Database Configuration
+DB_HOST=your-mysql-host
+DB_PORT=3306
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
+DB_NAME=your-db-name
 ```
 
-#### 2. Get User by ID
-```http
-GET /api/users/{id}
+### Kubernetes Deployment
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-quarkus-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: otel-quarkus-api
+  template:
+    metadata:
+      labels:
+        app: otel-quarkus-api
+    spec:
+      containers:
+      - name: api
+        image: otel-example-quarkus:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://otel-collector:4320"
+        - name: DB_HOST
+          value: "mysql-service"
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+            port: 8080
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready
+            port: 8080
+          initialDelaySeconds: 10
 ```
 
-#### 3. Get User by Email
-```http
-GET /api/users/email/{email}
+### Building Docker Image
+
+```bash
+# Build the image locally
+docker build -t otel-example-quarkus:latest .
+
+# Build with Maven
+./mvnw clean package -Dquarkus.container-image.build=true
+
+# Build multi-platform image
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t otel-example-quarkus:latest .
 ```
 
-#### 4. Create User
-```http
-POST /api/users
-Content-Type: application/json
+## 📖 API Documentation
 
-{
-  "name": "John Doe",
-  "email": "john.doe@example.com",
-  "bio": "Software Engineer"
-}
-```
+### Health Endpoints
 
-#### 5. Update User
-```http
-PUT /api/users/{id}
-Content-Type: application/json
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/q/health` | Overall health check |
+| GET | `/q/health/live` | Liveness probe |
+| GET | `/q/health/ready` | Readiness probe |
+| GET | `/q/metrics` | Prometheus-compatible metrics |
 
-{
-  "name": "John Updated",
-  "email": "john.updated@example.com",
-  "bio": "Senior Software Engineer"
-}
-```
+### User API
 
-#### 6. Delete User
-```http
-DELETE /api/users/{id}
-```
-
-#### 7. Search Users by Name
-```http
-GET /api/users/search?name={query}
-```
-
-#### 8. Get Recent Users
-```http
-GET /api/users/recent?days={days}
-```
-
-#### 9. Get User Count
-```http
-GET /api/users/count
-```
-
-#### 10. Health Check
-```http
-GET /api/users/health
-```
+| Method | Endpoint | Description | Request Body |
+|--------|----------|-------------|--------------|
+| GET | `/api/users` | List all users | - |
+| GET | `/api/users/{id}` | Get user by ID | - |
+| GET | `/api/users/email/{email}` | Get user by email | - |
+| GET | `/api/users/search?name={name}` | Search users by name | - |
+| GET | `/api/users/recent?days={days}` | Get recent users | - |
+| GET | `/api/users/count` | Get user count | - |
+| POST | `/api/users` | Create new user | `{"name": "John", "email": "john@example.com", "bio": "Developer"}` |
+| PUT | `/api/users/{id}` | Update user | `{"name": "John Updated"}` |
+| DELETE | `/api/users/{id}` | Delete user | - |
 
 ### Example Requests
 
@@ -299,321 +193,229 @@ GET /api/users/health
 # Create a user
 curl -X POST http://localhost:8080/api/users \
   -H "Content-Type: application/json" \
-  -d '{"name": "Jane Smith", "email": "jane@example.com", "bio": "DevOps Engineer"}'
+  -d '{"name": "John Doe", "email": "john@example.com", "bio": "Software Engineer"}'
 
 # Get all users
 curl http://localhost:8080/api/users
 
+# Get user by ID
+curl http://localhost:8080/api/users/1
+
 # Search users
-curl "http://localhost:8080/api/users/search?name=Jane"
+curl http://localhost:8080/api/users/search?name=John
+
+# Get recent users (last 7 days)
+curl http://localhost:8080/api/users/recent?days=7
 
 # Update user
 curl -X PUT http://localhost:8080/api/users/1 \
   -H "Content-Type: application/json" \
-  -d '{"name": "Jane Updated", "email": "jane.updated@example.com", "bio": "Senior DevOps"}'
+  -d '{"name": "John Updated", "bio": "Senior Engineer"}'
 
 # Delete user
 curl -X DELETE http://localhost:8080/api/users/1
 ```
 
-## 🧪 Testing
-
-### Run All Tests
-```bash
-./mvnw test
-```
-
-### Run Tests with Coverage
-```bash
-./mvnw clean test jacoco:report
-```
-
-### View Coverage Report
-```bash
-open target/site/jacoco/index.html
-```
-
-### Run Integration Tests Only
-```bash
-./mvnw verify
-```
-
-### Test Structure
-
-- **Repository Tests**: `UserRepositoryTest` - Data layer tests
-- **Service Tests**: `UserServiceTest` - Business logic tests with mocking
-- **Resource Tests**: `UserResourceTest` - REST API integration tests
-
-### Coverage Goals
-
-- **Line Coverage**: ≥ 80%
-- **Branch Coverage**: ≥ 75%
-
-The build will warn if coverage falls below these thresholds.
-
-## 📊 Observability
-
-### OpenTelemetry Configuration
-
-The application automatically instruments:
-- HTTP requests and responses
-- Database queries
-- Custom business logic spans
-
-### Viewing Traces in Grafana
-
-1. Open Grafana: http://localhost:3000
-2. Navigate to Explore
-3. Select **Tempo** datasource
-4. Query: `{service.name="otel-quarkus-crud"}`
-
-### Custom Spans
-
-The service layer includes custom instrumentation:
-
-```java
-@WithSpan("UserService.createUser")
-public User createUser(@SpanAttribute("user.email") User user) {
-    Span span = Span.current();
-    span.setAttribute("user.name", user.name);
-    // Business logic
-}
-```
-
-### Metrics
-
-View Prometheus metrics:
-- **Endpoint**: http://localhost:8080/q/metrics
-- **Grafana Query**: `rate(http_requests_total[5m])`
-
-### Logs
-
-Logs are collected by Loki and can be queried in Grafana:
-```
-{job="otel-quarkus-crud"} |= "error"
-```
-
-### Key Metrics to Monitor
-
-1. **Request Rate**: `rate(http_server_requests_seconds_count[5m])`
-2. **Error Rate**: `rate(http_server_requests_seconds_count{status=~"5.."}[5m])`
-3. **Response Time (p95)**: `histogram_quantile(0.95, http_server_requests_seconds_bucket)`
-4. **JVM Memory**: `jvm_memory_used_bytes`
-
-## 🐳 Docker Deployment
-
-### Build Docker Image
-```bash
-docker build -t otel-quarkus-crud .
-```
-
-### Run Container
-```bash
-docker run -p 8080:8080 otel-quarkus-crud
-```
-
-### Docker Compose Services
-
-| Service | Port | Description |
-|---------|------|-------------|
-| **otel-quarkus-crud** | 8080 | Main application |
-| **postgres** | 5432 | PostgreSQL database |
-| **grafana** | 3000 | Visualization (admin/admin) |
-| **alloy** | 12345, 4320, 4321 | Telemetry collector |
-| **tempo** | 3200, 4317, 4318 | Trace storage |
-| **mimir** | 9009 | Metrics storage |
-| **loki** | 3100 | Log aggregation |
-| **minio** | 9000, 9001 | Object storage |
-
-### Docker Commands
-
-```bash
-# Start all services
-docker compose up -d
-
-# View logs
-docker compose logs -f otel-quarkus-crud
-
-# Stop services
-docker compose down
-
-# Stop and remove volumes (⚠️ Data loss)
-docker compose down -v
-
-# Rebuild and restart
-docker compose up -d --build
-```
-
-## 🔄 CI/CD
-
-### GitHub Actions Workflow
-
-The CI/CD pipeline includes:
-
-1. **Test Job**: Runs unit tests and generates coverage reports
-2. **Build Job**: Packages the application
-3. **Docker Job**: Builds and pushes Docker image (main branch only)
-4. **Integration Test Job**: Tests the full stack
-
-### Required GitHub Secrets
-
-Configure these secrets in your repository:
-
-```
-Settings → Secrets and variables → Actions
-```
-
-- `CODECOV_TOKEN`: Codecov upload token
-- `DOCKER_USERNAME`: Docker Hub username
-- `DOCKER_PASSWORD`: Docker Hub password/token
-
-### Workflow Triggers
-
-- Push to `main` or `develop` branches
-- Pull requests to `main` branch
-
-### Status Badges
-
-Add these to your README:
-```markdown
-[![CI/CD](https://github.com/YOUR_USERNAME/otel-quarkus-crud/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/otel-quarkus-crud/actions)
-[![codecov](https://codecov.io/gh/YOUR_USERNAME/otel-quarkus-crud/branch/main/graph/badge.svg)](https://codecov.io/gh/YOUR_USERNAME/otel-quarkus-crud)
-```
-
-## 🔧 Configuration
-
-### Profiles
-
-Quarkus supports multiple profiles:
-
-- **dev**: Development mode (H2, debug logging)
-- **test**: Test mode (H2, minimal logging)
-- **prod**: Production mode (PostgreSQL, JSON logging)
+## ⚙️ Configuration
 
 ### Environment Variables
 
-Override configuration using environment variables:
+| Variable | Description | Default |
+|----------|-------------|---------|
+| **OpenTelemetry** | | |
+| `QUARKUS_OTEL_ENABLED` | Enable OpenTelemetry | `true` |
+| `QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector endpoint | `http://localhost:4320` |
+| `QUARKUS_OTEL_LOGS_ENABLED` | Enable OTLP log export | `true` |
+| `QUARKUS_OTEL_TRACES_ENABLED` | Enable distributed tracing | `true` |
+| `QUARKUS_OTEL_METRICS_ENABLED` | Enable metrics collection | `true` |
+| **Database** | | |
+| `DB_HOST` | MySQL host | `localhost` |
+| `DB_PORT` | MySQL port | `3306` |
+| `DB_USER` | MySQL user | `user` |
+| `DB_PASSWORD` | MySQL password | `password` |
+| `DB_NAME` | MySQL database name | `userdb` |
+| **Server** | | |
+| `QUARKUS_HTTP_PORT` | API server port | `8080` |
+| `QUARKUS_HTTP_HOST` | API server host | `0.0.0.0` |
+
+## 🔭 Observability
+
+This project includes a complete observability stack using the LGTM (Loki, Grafana, Tempo, Mimir) stack:
+
+### Distributed Tracing (Tempo)
+- Trace all HTTP requests and database queries
+- Correlate logs with traces using trace IDs
+- View spans in Grafana with trace context
+
+### Metrics Collection (Mimir)
+- HTTP server metrics (request duration, status codes, etc.)
+- JVM metrics (memory, threads, GC)
+- Database connection pool metrics
+- Custom business metrics
+
+### Log Aggregation (Loki)
+- Structured JSON logs
+- Automatic trace correlation
+- Log levels and filtering
+- Full-text search capabilities
+
+### Visualization (Grafana)
+Pre-configured dashboards for:
+- Application overview
+- HTTP request metrics
+- JVM performance
+- Trace exploration
+
+**Access Grafana**: http://localhost:3000 (admin/admin)
+
+## 🏗️ Project Structure
+
+```
+.
+├── src/
+│   ├── main/
+│   │   ├── java/br/com/arquivolivre/otelquarkus/
+│   │   │   ├── model/          # JPA entities
+│   │   │   ├── repository/     # Data access layer
+│   │   │   ├── resource/       # REST endpoints
+│   │   │   └── service/        # Business logic
+│   │   └── resources/
+│   │       ├── application.properties  # Configuration
+│   │       └── import.sql      # Initial data
+│   └── test/
+│       └── java/               # Unit and integration tests
+├── config/                     # Observability stack configs
+│   ├── alloy.alloy            # Grafana Alloy configuration
+│   ├── tempo.yaml             # Tempo tracing backend
+│   ├── mimir.yaml             # Mimir metrics backend
+│   ├── loki.yaml              # Loki logging backend
+│   └── grafana/               # Grafana provisioning
+├── docker-compose.yml         # Full stack deployment
+├── Dockerfile                 # Multi-stage Docker build
+├── pom.xml                    # Maven dependencies
+└── README.md                  # This file
+```
+
+## 🛠️ Development
+
+### Running in Dev Mode
+
+Quarkus provides a development mode with hot-reload:
 
 ```bash
-export QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://localhost:5432/mydb
-export QUARKUS_DATASOURCE_USERNAME=user
-export QUARKUS_DATASOURCE_PASSWORD=pass
-export QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://alloy:4320
+./mvnw quarkus:dev
 ```
 
-### Key Configuration Properties
+This enables:
+- Live reload of code changes
+- Dev UI at http://localhost:8080/q/dev
+- Debugging on port 5005
 
-```properties
-# Database
-quarkus.datasource.db-kind=postgresql
-quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/quarkus_db
-
-# OpenTelemetry
-quarkus.otel.enabled=true
-quarkus.otel.exporter.otlp.traces.endpoint=http://localhost:4317
-
-# Server
-quarkus.http.port=8080
-quarkus.http.host=0.0.0.0
-```
-
-## 📈 Performance
-
-### Quarkus Benefits
-
-- **Fast Startup**: ~1 second startup time
-- **Low Memory**: ~50MB RSS memory
-- **High Throughput**: Reactive architecture
-- **Native Compilation**: Optional GraalVM native image support
-
-### Build Native Image
+### Code Quality
 
 ```bash
-./mvnw package -Dnative
+# Format code
+./mvnw spotless:apply
+
+# Check code style
+./mvnw spotless:check
+
+# Run static analysis
+./mvnw verify
 ```
+
+### Database Migrations
+
+```bash
+# The app automatically creates/updates schema on startup
+# Initial data is loaded from src/main/resources/import.sql
+```
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+./mvnw test
+
+# Run with coverage
+./mvnw verify
+
+# Run specific test class
+./mvnw test -Dtest=UserResourceTest
+
+# Run integration tests only
+./mvnw verify -Dskip.unit.tests=true
+```
+
+### Test Coverage
+
+- **Unit Tests**: Repository, Service, and Resource layers
+- **Integration Tests**: Full API endpoint testing
+- **Coverage Target**: >80% line coverage, >75% branch coverage
+
+View coverage report: `target/site/jacoco/index.html`
+
+## 🐳 Docker
+
+### Build and Run
+
+```bash
+# Build the Docker image
+docker build -t otel-quarkus-api .
+
+# Run the container
+docker run -d \
+  -p 8080:8080 \
+  -e DB_HOST=mysql \
+  -e QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4320 \
+  otel-quarkus-api
+```
+
+### Docker Compose
+
+```bash
+# Start full stack
+docker-compose up -d
+
+# View logs
+docker-compose logs -f app
+
+# Stop services
+docker-compose down
+
+# Rebuild and restart
+docker-compose up -d --build app
+```
+
+## 📊 Monitoring
+
+### Metrics Endpoints
+
+- Prometheus metrics: http://localhost:8080/q/metrics
+- Health check: http://localhost:8080/q/health
+- OpenAPI spec: http://localhost:8080/q/openapi
+
+### Grafana Dashboards
+
+1. **Application Overview**: Real-time metrics and request rates
+2. **JVM Metrics**: Memory, GC, and thread monitoring
+3. **Trace Analysis**: Distributed tracing visualization
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-### Development Guidelines
+### Code Standards
 
-- Write tests for new features (maintain 80%+ coverage)
-- Follow existing code style
-- Update documentation
-- Add OpenTelemetry spans for new operations
+- Follow Java code conventions
+- Add tests for new features
+- Update documentation as needed
+- Run `./mvnw spotless:apply` before committing
 
-## 📄 License
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🔗 Resources
-
-- [Quarkus Documentation](https://quarkus.io/guides/)
-- [OpenTelemetry Java](https://opentelemetry.io/docs/languages/java/)
-- [Grafana Alloy](https://grafana.com/docs/alloy/)
-- [Grafana Tempo](https://grafana.com/docs/tempo/)
-- [Grafana Mimir](https://grafana.com/docs/mimir/)
-- [Grafana Loki](https://grafana.com/docs/loki/)
-- [Hibernate Panache](https://quarkus.io/guides/hibernate-orm-panache)
-
-## 💡 Tips & Tricks
-
-### Quarkus Dev Mode
-
-- Press `w` to open browser
-- Press `e` to edit configuration
-- Press `h` for help
-- Press `s` to force restart
-
-### Quick Database Reset
-
-```bash
-# In dev mode, just restart and DB is recreated
-./mvnw quarkus:dev
-```
-
-### Generate Coverage Report Quickly
-
-```bash
-./mvnw test jacoco:report && open target/site/jacoco/index.html
-```
-
-## 🐛 Troubleshooting
-
-### Port Already in Use
-
-```bash
-# Change port in application.properties
-quarkus.http.port=8081
-```
-
-### OpenTelemetry Not Working
-
-```bash
-# Check Alloy is running
-curl http://localhost:4320
-
-# Enable debug logging
-quarkus.log.category."io.opentelemetry".level=DEBUG
-```
-
-### Database Connection Issues
-
-```bash
-# Verify PostgreSQL is running
-docker compose ps postgres
-
-# Check connection
-psql -h localhost -U postgres -d quarkus_db
-```
-
----
-
-**Built with ❤️ using Quarkus and OpenTelemetry**
-
-For questions or issues, please open an issue in the GitHub repository.
