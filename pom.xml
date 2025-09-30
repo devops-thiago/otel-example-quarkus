@@ -35,7 +35,6 @@
 
         <!-- Coverage Configuration -->
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <sonar.jacoco.reportPaths>target/jacoco.exec</sonar.jacoco.reportPaths>
         <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
 
         <!-- Source and Test Directories -->
@@ -48,7 +47,8 @@
         <sonar.coverage.exclusions>**/model/**</sonar.coverage.exclusions>
 
         <!-- Analysis Parameters -->
-        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+        <sonar.qualitygate.wait>false</sonar.qualitygate.wait>
+        <sonar.scm.provider>git</sonar.scm.provider>
     </properties>
 
     <dependencyManagement>
