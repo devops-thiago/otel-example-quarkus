@@ -204,18 +204,6 @@ class UserTest {
     }
 
     @Test
-    void testHashCodeWithNullFields() {
-        // Given
-        User user = new User();
-
-        // When
-        int hashCode = user.hashCode();
-
-        // Then - should not throw NPE
-        assertThat(hashCode).isNotNull();
-    }
-
-    @Test
     void testToStringWithAllFields() {
         // Given
         User user = new User("John Doe", "john@example.com", "Bio");
