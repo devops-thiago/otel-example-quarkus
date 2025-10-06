@@ -42,7 +42,7 @@ RUN ./mvnw package -Pnative -DskipTests -B \
 RUN ls -lh target/*-runner
 
 # Stage 2: Runtime stage - minimal container
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6
 
 # Install required runtime libraries
 RUN microdnf install -y shadow-utils && \
