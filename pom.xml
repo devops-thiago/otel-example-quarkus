@@ -24,7 +24,7 @@
         <quarkus.version>3.28.3</quarkus.version>
         <compiler-plugin.version>3.14.1</compiler-plugin.version>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
-        <jacoco.version>0.8.13</jacoco.version>
+        <jacoco.version>0.8.14</jacoco.version>
 
         <!-- SonarCloud Configuration -->
         <sonar.projectKey>devops-thiago_otel-example-quarkus</sonar.projectKey>
