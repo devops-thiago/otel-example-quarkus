@@ -7,7 +7,7 @@ common:
   path_prefix: /tmp/loki
   storage:
     s3:
-      endpoint: minio:9000
+      endpoint: http://minio:9000
       bucketnames: loki-data
       access_key_id: admin
       secret_access_key: password123

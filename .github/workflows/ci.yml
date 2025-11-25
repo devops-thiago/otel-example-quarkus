@@ -181,6 +181,31 @@ jobs:
 
     - name: Wait for services to be ready
       run: |
+        echo "Waiting for observability health check to complete..."
+        timeout 600 bash -c '
+          while true; do
+            status=$(docker inspect --format="{{.State.Status}}" observability-health-check 2>/dev/null || echo "not_found")
+            if [ "$status" = "exited" ]; then
+              exit_code=$(docker inspect --format="{{.State.ExitCode}}" observability-health-check)
+              if [ "$exit_code" = "0" ]; then
+                echo "✅ Observability services health check passed!"
+                break
+              else
+                echo "❌ Observability services health check failed with exit code $exit_code"
+                docker logs observability-health-check
+                exit 1
+              fi
+            elif [ "$status" = "running" ]; then
+              echo "⏳ Health check in progress..."
+              sleep 10
+            else
+              echo "⏳ Waiting for health check to start (status: $status)..."
+              sleep 5
+            fi
+          done
+        '
+
+        echo "Waiting for application to start..."
         timeout 300 bash -c 'until curl -f http://localhost:8080/q/health; do sleep 5; done'
 
     - name: Run integration tests
@@ -203,6 +228,30 @@ jobs:
 
         # Verify Alloy is running
         curl -f http://localhost:12345
+
+    - name: Debug on failure
+      if: failure()
+      run: |
+        echo "=== Container Status ==="
+        docker compose ps -a
+
+        echo "=== Container Logs ==="
+        echo "--- Tempo logs ---"
+        docker logs tempo --tail 50 || true
+
+        echo "--- Loki logs ---"
+        docker logs loki --tail 50 || true
+
+        echo "--- Mimir logs ---"
+        docker logs mimir --tail 50 || true
+
+        echo "--- MinIO logs ---"
+        docker logs minio --tail 30 || true
+
+        echo "=== Health Check Status ==="
+        docker inspect --format='{{.State.Health}}' tempo || true
+        docker inspect --format='{{.State.Health}}' loki || true
+        docker inspect --format='{{.State.Health}}' mimir || true
 
     - name: Stop services
       if: always()

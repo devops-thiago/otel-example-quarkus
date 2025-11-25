@@ -95,12 +95,6 @@ services:
       - "-config.file=/etc/tempo.yaml"
     volumes:
       - ./config/tempo.yaml:/etc/tempo.yaml
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3200/ready"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
     depends_on:
       minio-setup:
         condition: service_completed_successfully
@@ -108,7 +102,7 @@ services:
       - otel-network
 
   mimir:
-    image: grafana/mimir-alpine:latest
+    image: grafana/mimir:latest
     container_name: mimir
     ports:
       - "9009:9009"
@@ -116,12 +110,6 @@ services:
       - "-config.file=/etc/mimir.yaml"
     volumes:
       - ./config/mimir.yaml:/etc/mimir.yaml
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9009/ready"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
     depends_on:
       minio-setup:
         condition: service_completed_successfully
@@ -137,15 +125,55 @@ services:
       - "-config.file=/etc/loki.yaml"
     volumes:
       - ./config/loki.yaml:/etc/loki.yaml
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/ready"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
     depends_on:
       minio-setup:
         condition: service_completed_successfully
+    networks:
+      - otel-network
+
+  observability-health-check:
+    image: curlimages/curl:latest
+    container_name: observability-health-check
+    command: >
+      sh -c '
+        echo "Waiting for observability services to be ready..."
+
+        # Wait for services to start (give them time to initialize)
+        sleep 30
+
+        # Function to check service health
+        check_service() {
+          local service_name=$$1
+          local url=$$2
+          local max_attempts=30
+          local attempt=1
+
+          echo "Checking $$service_name..."
+          while [ $$attempt -le $$max_attempts ]; do
+            if curl -f -s --max-time 5 "$$url" > /dev/null 2>&1; then
+              echo "✓ $$service_name is ready"
+              return 0
+            fi
+            echo "  Attempt $$attempt/$$max_attempts: $$service_name not ready, waiting..."
+            sleep 10
+            attempt=$$((attempt + 1))
+          done
+
+          echo "✗ $$service_name failed to become ready after $$max_attempts attempts"
+          return 1
+        }
+
+        # Check all services
+        check_service "Tempo" "http://tempo:3200/ready" &&
+        check_service "Loki" "http://loki:3100/ready" &&
+        check_service "Mimir" "http://mimir:9009/ready" &&
+        echo "🎉 All observability services are ready!" ||
+        (echo "❌ One or more services failed health checks" && exit 1)
+      '
+    depends_on:
+      - tempo
+      - loki
+      - mimir
     networks:
       - otel-network
 
@@ -166,12 +194,8 @@ services:
       - ./config/alloy.alloy:/etc/alloy/config.alloy
       - alloy_data:/var/lib/alloy/data
     depends_on:
-      tempo:
-        condition: service_healthy
-      mimir:
-        condition: service_healthy
-      loki:
-        condition: service_healthy
+      observability-health-check:
+        condition: service_completed_successfully
     networks:
       - otel-network
 
@@ -187,12 +211,8 @@ services:
       - grafana_data:/var/lib/grafana
       - ./config/grafana/provisioning:/etc/grafana/provisioning
     depends_on:
-      tempo:
-        condition: service_healthy
-      mimir:
-        condition: service_healthy
-      loki:
-        condition: service_healthy
+      observability-health-check:
+        condition: service_completed_successfully
     networks:
       - otel-network
 
