@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for Quarkus Application
 # Stage 1: Build stage
-FROM maven:3.9-eclipse-temurin-21-alpine AS build
+FROM maven:3-eclipse-temurin-25-alpine AS build
 
 # Set working directory
 WORKDIR /app
