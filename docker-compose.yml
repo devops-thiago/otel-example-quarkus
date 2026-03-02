@@ -85,7 +85,7 @@ services:
       - otel-network
 
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.10.1
     container_name: tempo
     ports:
       - "3200:3200"
