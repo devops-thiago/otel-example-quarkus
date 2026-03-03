@@ -25,6 +25,8 @@
         <compiler-plugin.version>3.15.0</compiler-plugin.version>
         <surefire-plugin.version>3.5.5</surefire-plugin.version>
         <jacoco.version>0.8.14</jacoco.version>
+        <spotless.version>2.44.5</spotless.version>
+        <google-java-format.version>1.27.0</google-java-format.version>
 
         <!-- SonarCloud Configuration -->
         <sonar.projectKey>devops-thiago_otel-example-quarkus</sonar.projectKey>
@@ -282,16 +284,16 @@
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>${spotless.version}</version>
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.19.2</version>
+                            <version>${google-java-format.version}</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
-                        <removeUnusedImports />
-                        <trimTrailingWhitespace />
-                        <endWithNewline />
+                        <removeUnusedImports/>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>
                     </java>
                 </configuration>
             </plugin>
