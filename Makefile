@@ -1,4 +1,4 @@
-.PHONY: help test fmt fmt-check verify clean
+.PHONY: help test fmt fmt-check lint verify clean
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -14,9 +14,7 @@ fmt-check: ## Check formatting without making changes (use in CI)
 
 lint: fmt-check ## Alias for fmt-check
 
-verify: ## Run format check + full test suite
-	mvn spotless:check
-	mvn test
+verify: fmt-check test ## Run format check + full test suite
 
 clean: ## Remove build output
 	mvn clean
