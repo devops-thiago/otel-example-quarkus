@@ -2,11 +2,11 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/devops-thiago/otel-example-quarkus/ci.yml?branch=main&label=CI)](https://github.com/devops-thiago/otel-example-quarkus/actions)
 [![Java Version](https://img.shields.io/badge/java-21-007396?logo=openjdk)](https://openjdk.org)
-[![Quarkus](https://img.shields.io/badge/Quarkus-3.28.1-4695EB?logo=quarkus)](https://quarkus.io)
+[![Quarkus](https://img.shields.io/badge/Quarkus-3.32.1-4695EB?logo=quarkus)](https://quarkus.io)
 [![License](https://img.shields.io/github/license/devops-thiago/otel-example-quarkus)](LICENSE)
 [![Codecov](https://img.shields.io/codecov/c/github/devops-thiago/otel-example-quarkus?label=coverage)](https://app.codecov.io/gh/devops-thiago/otel-example-quarkus)
 [![Sonar Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=devops-thiago_otel-example-quarkus&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=devops-thiago_otel-example-quarkus)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=devops-thiago_otel-example-quarkus&metric=coverage)](https://sonarcloud.io/summary/new_code?id=devops-thiago_otel-example-quarkus)
+[![Sonar Coverage](https://sonarcloud.io/api/project_badges/measure?project=devops-thiago_otel-example-quarkus&metric=coverage)](https://sonarcloud.io/summary/new_code?id=devops-thiago_otel-example-quarkus)
 [![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-enabled-blue?logo=opentelemetry)](https://opentelemetry.io)
 [![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)](https://www.docker.com)
 [![Docker Hub](https://img.shields.io/docker/v/thiagosg/otel-crud-api-quarkus?logo=docker&label=Docker%20Hub)](https://hub.docker.com/r/thiagosg/otel-crud-api-quarkus)
