@@ -25,7 +25,7 @@
         <compiler-plugin.version>3.15.0</compiler-plugin.version>
         <surefire-plugin.version>3.5.5</surefire-plugin.version>
         <jacoco.version>0.8.14</jacoco.version>
-        <spotless.version>2.44.5</spotless.version>
+        <spotless.version>3.4.0</spotless.version>
         <google-java-format.version>1.27.0</google-java-format.version>
 
         <!-- SonarCloud Configuration -->
