@@ -226,7 +226,7 @@ jobs:
         docker inspect otel-example-quarkus:pr-${{ github.event.pull_request.number }}
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.24.0
+      uses: aquasecurity/trivy-action@0.35.0
       with:
         image-ref: otel-example-quarkus:pr-${{ github.event.pull_request.number }}
         format: 'sarif'
