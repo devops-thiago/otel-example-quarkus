@@ -31,6 +31,7 @@ services:
       QUARKUS_DATASOURCE_USERNAME: user
       QUARKUS_DATASOURCE_PASSWORD: password
       QUARKUS_DATASOURCE_DB_KIND: mysql
+      QUARKUS_DATASOURCE_JDBC_TELEMETRY: "true"
       QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4320
       QUARKUS_OTEL_EXPORTER_OTLP_PROTOCOL: grpc
       QUARKUS_LOG_CONSOLE_FORMAT: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p traceId=%X{traceId}, spanId=%X{spanId}, sampled=%X{sampled} [%c{3.}] (%t) %s%e%n"
@@ -41,6 +42,21 @@ services:
         condition: service_healthy
       alloy:
         condition: service_started
+    networks:
+      - otel-network
+
+  mysqld-exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: mysqld-exporter
+    restart: always
+    environment:
+      DATA_SOURCE_NAME: "root:root@(mysql:3306)/"
+    command:
+      - "--mysqld.username=root:root"
+      - "--mysqld.address=mysql:3306"
+    depends_on:
+      mysql:
+        condition: service_healthy
     networks:
       - otel-network
 
@@ -206,7 +222,7 @@ services:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor,traceToLogs,correlations,lokiLogsDataplane
     volumes:
       - grafana_data:/var/lib/grafana
       - ./config/grafana/provisioning:/etc/grafana/provisioning

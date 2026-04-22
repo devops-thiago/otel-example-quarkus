@@ -69,18 +69,20 @@ docker-compose ps
 - API: http://localhost:8080
 - API Docs (Swagger): http://localhost:8080/q/swagger-ui
 - Health: http://localhost:8080/q/health
-- Metrics: http://localhost:8080/q/metrics
 - Grafana: http://localhost:3000 (admin/admin)
 - Alloy UI: http://localhost:12345
+
+> Metrics are pushed via OTLP to Alloy and stored in Mimir.
+> Query them in Grafana with PromQL instead of scraping an endpoint on the app.
 
 ### Option 2: Run Locally
 
 ```bash
 # Install dependencies and run in dev mode
-./mvnw quarkus:dev
+mvn quarkus:dev
 
 # Or build and run
-./mvnw clean package
+mvn clean package
 java -jar target/quarkus-app/quarkus-run.jar
 ```
 
@@ -157,7 +159,7 @@ spec:
 docker build -t otel-example-quarkus:latest .
 
 # Build with Maven
-./mvnw clean package -Dquarkus.container-image.build=true
+mvn clean package -Dquarkus.container-image.build=true
 
 # Build multi-platform image
 docker buildx build \
@@ -192,7 +194,6 @@ docker-compose -f docker-compose.native.yml up -d
 | GET | `/q/health` | Overall health check |
 | GET | `/q/health/live` | Liveness probe |
 | GET | `/q/health/ready` | Readiness probe |
-| GET | `/q/metrics` | Prometheus-compatible metrics |
 
 ### User API
 
@@ -269,10 +270,19 @@ This project includes a complete observability stack using the LGTM (Loki, Grafa
 - View spans in Grafana with trace context
 
 ### Metrics Collection (Mimir)
-- HTTP server metrics (request duration, status codes, etc.)
-- JVM metrics (memory, threads, GC)
-- Database connection pool metrics
-- Custom business metrics
+
+Metrics are exported via OTLP (no Prometheus scrape endpoint). The `quarkus-opentelemetry` extension provides:
+
+**Automatic metrics:**
+- HTTP server metrics (request duration, status codes, route)
+- JVM metrics (heap, GC, threads, class loading)
+- Database connection pool metrics (active, idle, wait time)
+
+**Custom business metrics (via the OpenTelemetry Meter API in `UserService`):**
+- `users.created.total` — counter, incremented on successful user creation
+- `users.errors.total` — counter with `error.type` attribute (`duplicate_email`, `not_found`)
+- `users.total` — observable gauge, current number of users
+- `user.search.duration` — histogram of search operation latency in ms
 
 ### Log Aggregation (Loki)
 - Structured JSON logs
@@ -324,7 +334,7 @@ Pre-configured dashboards for:
 Quarkus provides a development mode with hot-reload:
 
 ```bash
-./mvnw quarkus:dev
+mvn quarkus:dev
 ```
 
 This enables:
@@ -336,13 +346,13 @@ This enables:
 
 ```bash
 # Format code
-./mvnw spotless:apply
+mvn spotless:apply
 
 # Check code style
-./mvnw spotless:check
+mvn spotless:check
 
 # Run static analysis
-./mvnw verify
+mvn verify
 ```
 
 ### Database Migrations
@@ -356,16 +366,16 @@ This enables:
 
 ```bash
 # Run all tests
-./mvnw test
+mvn test
 
 # Run with coverage
-./mvnw verify
+mvn verify
 
 # Run specific test class
-./mvnw test -Dtest=UserResourceTest
+mvn test -Dtest=UserResourceTest
 
 # Run integration tests only
-./mvnw verify -Dskip.unit.tests=true
+mvn verify -Dskip.unit.tests=true
 ```
 
 ### Test Coverage
@@ -410,11 +420,12 @@ docker-compose up -d --build app
 
 ## 📊 Monitoring
 
-### Metrics Endpoints
+### Endpoints
 
-- Prometheus metrics: http://localhost:8080/q/metrics
 - Health check: http://localhost:8080/q/health
 - OpenAPI spec: http://localhost:8080/q/openapi
+
+Metrics are not exposed on the app. They are pushed via OTLP to Alloy and queried in Grafana.
 
 ### Grafana Dashboards
 
@@ -435,7 +446,7 @@ docker-compose up -d --build app
 - Follow Java code conventions
 - Add tests for new features
 - Update documentation as needed
-- Run `./mvnw spotless:apply` before committing
+- Run `mvn spotless:apply` before committing
 
 ## 📝 License
 

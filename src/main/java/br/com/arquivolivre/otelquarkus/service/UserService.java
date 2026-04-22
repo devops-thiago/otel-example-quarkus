@@ -2,6 +2,12 @@ package br.com.arquivolivre.otelquarkus.service;
 
 import br.com.arquivolivre.otelquarkus.model.User;
 import br.com.arquivolivre.otelquarkus.repository.UserRepository;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.LongHistogram;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.ObservableLongGauge;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
@@ -10,18 +16,68 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import org.jboss.logging.Logger;
 
 /**
  * Service layer for User business logic. Includes OpenTelemetry instrumentation for distributed
- * tracing.
+ * tracing and custom metrics via the OpenTelemetry Meter API.
  */
 @ApplicationScoped
 public class UserService {
 
     private static final Logger LOG = Logger.getLogger(UserService.class);
+    private static final AttributeKey<String> ERROR_TYPE = AttributeKey.stringKey("error.type");
 
-    @Inject UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final LongCounter userCreatedCounter;
+    private final LongCounter userErrorsCounter;
+    private final LongHistogram userSearchDuration;
+    private final ObservableLongGauge usersTotalGauge;
+    private final AtomicLong currentUserCount = new AtomicLong(0);
+
+    /**
+     * Constructor injection of the UserRepository and the OpenTelemetry Meter. All custom metrics
+     * are registered here so that the service is fully initialized once CDI returns, and so it can
+     * be unit-tested by passing a no-op Meter.
+     */
+    @Inject
+    public UserService(UserRepository userRepository, Meter meter) {
+        this.userRepository = userRepository;
+
+        this.userCreatedCounter =
+                meter.counterBuilder("users.created.total")
+                        .setDescription("Total number of users created")
+                        .setUnit("1")
+                        .build();
+
+        this.userErrorsCounter =
+                meter.counterBuilder("users.errors.total")
+                        .setDescription("Total number of user-related errors")
+                        .setUnit("1")
+                        .build();
+
+        this.userSearchDuration =
+                meter.histogramBuilder("user.search.duration")
+                        .ofLongs()
+                        .setDescription("Duration of user search operations")
+                        .setUnit("ms")
+                        .build();
+
+        // The gauge callback runs on the OTel PeriodicMetricReader background thread,
+        // which has no CDI request context or active transaction. Querying the DB here
+        // throws ContextNotActiveException. Instead, we maintain an in-memory AtomicLong
+        // that is updated on create/delete and seed it from the DB count at startup
+        // (which runs within a valid CDI context).
+        this.currentUserCount.set(userRepository.countUsers());
+
+        this.usersTotalGauge =
+                meter.gaugeBuilder("users.total")
+                        .ofLongs()
+                        .setDescription("Current total number of users")
+                        .setUnit("1")
+                        .buildWithCallback(m -> m.record(currentUserCount.get()));
+    }
 
     /**
      * Get all users
@@ -105,6 +161,7 @@ public class UserService {
             LOG.errorf("Email already exists: %s", user.email);
             span.setAttribute("error", true);
             span.setAttribute("error.type", "duplicate_email");
+            userErrorsCounter.add(1, Attributes.of(ERROR_TYPE, "duplicate_email"));
             throw new IllegalArgumentException("Email already exists: " + user.email);
         }
 
@@ -113,6 +170,8 @@ public class UserService {
             span.setAttribute("user.id", user.id);
         }
         span.setAttribute("user.created", true);
+        userCreatedCounter.add(1);
+        currentUserCount.incrementAndGet();
 
         LOG.infof("User created successfully with id: %d", user.id);
         return user;
@@ -141,6 +200,8 @@ public class UserService {
                                     LOG.errorf("User not found with id: %d", id);
                                     span.setAttribute("error", true);
                                     span.setAttribute("error.type", "not_found");
+                                    userErrorsCounter.add(
+                                            1, Attributes.of(ERROR_TYPE, "not_found"));
                                     return new IllegalArgumentException(
                                             "User not found with id: " + id);
                                 });
@@ -151,6 +212,7 @@ public class UserService {
             LOG.errorf("Email already exists: %s", updatedUser.email);
             span.setAttribute("error", true);
             span.setAttribute("error.type", "duplicate_email");
+            userErrorsCounter.add(1, Attributes.of(ERROR_TYPE, "duplicate_email"));
             throw new IllegalArgumentException("Email already exists: " + updatedUser.email);
         }
 
@@ -182,6 +244,7 @@ public class UserService {
         span.setAttribute("user.deleted", deleted);
 
         if (deleted) {
+            currentUserCount.decrementAndGet();
             LOG.infof("User deleted successfully with id: %d", id);
         } else {
             LOG.warnf("User not found for deletion with id: %d", id);
@@ -202,7 +265,10 @@ public class UserService {
         LOG.infof("Searching users with name: %s", name);
         Span span = Span.current();
 
+        long start = System.nanoTime();
         List<User> users = userRepository.searchByName(name);
+        userSearchDuration.record((System.nanoTime() - start) / 1_000_000);
+
         span.setAttribute("search.results", users.size());
 
         LOG.infof("Found %d users matching name: %s", users.size(), name);

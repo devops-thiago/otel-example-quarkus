@@ -15,18 +15,24 @@ datasources:
         datasourceUid: 'mimir'
       tracesToMetrics:
         datasourceUid: 'mimir'
+        spanStartTimeShift: '-5m'
+        spanEndTimeShift: '5m'
+        tags:
+          - key: 'db.system'
+          - key: 'db.operation'
+          - key: 'http_request_method'
+          - key: 'http_route'
       tracesToLogs:
         datasourceUid: 'loki'
+        spanStartTimeShift: '-5m'
+        spanEndTimeShift: '5m'
+        filterByTraceID: true
+        filterBySpanID: false
+        mapTagNamesEnabled: true
         mappedTags:
           - key: service.name
             value: service_name
-        mapTagNamesEnabled: true
-        spanStartTimeShift: '-1h'
-        spanEndTimeShift: '1h'
-        filterByTraceID: true
-        filterBySpanID: true
-        tags:
-          - service.name
+        lokiSearch: true
       search:
         hide: false
       nodeGraph:
@@ -67,8 +73,7 @@ datasources:
       maxLines: 1000
       derivedFields:
         - datasourceUid: tempo
-          matcherType: "label"
-          matcher: "trace_id"
-          name: TraceID
+          matcherType: label
+          name: trace_id
           url: "$${__value.raw}"
           urlDisplayLabel: 'View Trace'
