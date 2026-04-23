@@ -52,6 +52,21 @@ limits_config:
   ingestion_burst_size_mb: 6
   per_stream_rate_limit: 3MB
   per_stream_rate_limit_burst: 15MB
+  otlp_config:
+    resource_attributes:
+      attributes_config:
+        - action: index_label
+          attributes:
+            - service_name
+            - deployment_environment
+        - action: structured_metadata
+          regex: .*
+    scope_attributes:
+      - action: structured_metadata
+        regex: .*
+    log_attributes:
+      - action: structured_metadata
+        regex: .*
 
 analytics:
   reporting_enabled: false

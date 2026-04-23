@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 
 import br.com.arquivolivre.otelquarkus.model.User;
 import br.com.arquivolivre.otelquarkus.repository.UserRepository;
+import io.opentelemetry.api.OpenTelemetry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +15,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -27,12 +27,16 @@ class UserServiceUnitTest {
 
     @Mock private UserRepository userRepository;
 
-    @InjectMocks private UserService userService;
+    private UserService userService;
 
     private User testUser;
 
     @BeforeEach
     void setUp() {
+        userService = new UserService(userRepository, OpenTelemetry.noop().getMeter("test"));
+        // The constructor seeds the users.total gauge by calling countUsers() once;
+        // clear that interaction so each test only asserts its own calls.
+        clearInvocations(userRepository);
         testUser = new User("John Doe", "john@example.com", "Software Developer");
         testUser.id = 1L;
     }

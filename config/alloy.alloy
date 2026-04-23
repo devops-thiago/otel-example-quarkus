@@ -1,7 +1,12 @@
-// Alloy configuration for collecting metrics, traces and logs
-// This config sets up OTLP receivers and forwards to Tempo, Mimir, and Loki
+// Alloy configuration — receives OTLP from the app and forwards each signal
+// to its dedicated backend:
+//   traces  -> Tempo
+//   metrics -> Mimir
+//   logs    -> Loki
+//
+// Flow: app -> receiver -> batch processor -> exporters (all OTLP/HTTP)
 
-// OTLP receiver for traces
+// OTLP receiver — accepts traces, metrics and logs on both gRPC and HTTP
 otelcol.receiver.otlp "default" {
   grpc {
     endpoint = "0.0.0.0:4320"
@@ -18,26 +23,27 @@ otelcol.receiver.otlp "default" {
   }
 }
 
-// Batch processor for efficiency
+// Batch processor — groups telemetry before export to reduce network overhead.
+// Each signal is routed to the matching backend in the LGTM stack.
 otelcol.processor.batch "default" {
   output {
     metrics = [otelcol.exporter.otlphttp.mimir.input]
     logs    = [otelcol.exporter.otlphttp.loki.input]
-    traces  = [otelcol.exporter.otlp.tempo.input]
+    traces  = [otelcol.exporter.otlphttp.tempo.input]
   }
 }
 
-// Export traces to Tempo
-otelcol.exporter.otlp "tempo" {
+// Traces -> Tempo (OTLP/HTTP on port 4318)
+otelcol.exporter.otlphttp "tempo" {
   client {
-    endpoint = "http://tempo:4317"
+    endpoint = "http://tempo:4318"
     tls {
       insecure = true
     }
   }
 }
 
-// Export traces to Tempo
+// Metrics -> Mimir (OTLP/HTTP on port 9009, path /otlp)
 otelcol.exporter.otlphttp "mimir" {
   client {
     endpoint = "http://mimir:9009/otlp"
@@ -47,7 +53,7 @@ otelcol.exporter.otlphttp "mimir" {
   }
 }
 
-// Export traces to Tempo
+// Logs -> Loki (OTLP/HTTP on port 3100, path /otlp)
 otelcol.exporter.otlphttp "loki" {
   client {
     endpoint = "http://loki:3100/otlp"
@@ -57,8 +63,25 @@ otelcol.exporter.otlphttp "loki" {
   }
 }
 
+// MySQL exporter scrape — collects MySQL server metrics from mysqld-exporter
+prometheus.scrape "mysql" {
+  targets = [{
+    __address__ = "mysqld-exporter:9104",
+    job         = "mysql",
+  }]
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.mimir.receiver]
+}
+
+// Write scraped Prometheus metrics to Mimir
+prometheus.remote_write "mimir" {
+  endpoint {
+    url = "http://mimir:9009/api/v1/push"
+  }
+}
+
 // Logging configuration
 logging {
-  level = "info"
+  level  = "info"
   format = "logfmt"
 }

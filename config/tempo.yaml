@@ -22,11 +22,28 @@ metrics_generator:
   registry:
     external_labels:
       source: tempo
+  processor:
+    span_metrics:
+      dimensions:
+        - db.system
+        - db.operation
+        - db.sql.table
+        - db.name
+    service_graphs:
+      dimensions:
+        - db.system
   storage:
     path: /var/tempo/generator/wal
     remote_write:
       - url: http://mimir:9009/api/v1/push
         send_exemplars: true
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors:
+        - span-metrics
+        - service-graphs
 
 storage:
   trace:
