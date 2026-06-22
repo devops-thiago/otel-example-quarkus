@@ -70,21 +70,18 @@ jobs:
     - name: Run tests
       run: mvn clean test
 
-    - name: Generate test report
-      uses: dorny/test-reporter@df6247429542221bc30d46a036ee47af1102c451 # v2
+    - name: Publish test summary
       if: success() || failure()
-      with:
-        name: Maven Tests
-        path: target/surefire-reports/*.xml
-        reporter: java-junit
-        fail-on-error: true
-        path-replace-backslashes: false
-        list-suites: all
-        list-tests: all
-        max-annotations: 10
-        fail-on-empty: true
-        only-summary: false
-        token: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        python3 -c '
+        import glob, os, xml.etree.ElementTree as ET
+        t = f = e = s = 0
+        for p in glob.glob("target/surefire-reports/TEST-*.xml"):
+            r = ET.parse(p).getroot()
+            t += int(r.get("tests", 0)); f += int(r.get("failures", 0)); e += int(r.get("errors", 0)); s += int(r.get("skipped", 0))
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as out:
+            out.write(f"## Maven Tests\n\n- Tests: {t}\n- Failures: {f}\n- Errors: {e}\n- Skipped: {s}\n")
+        '
 
     - name: Generate code coverage report
       run: mvn jacoco:report
