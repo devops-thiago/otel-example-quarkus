@@ -24,7 +24,7 @@
         <quarkus.version>3.36.3</quarkus.version>
         <compiler-plugin.version>3.15.0</compiler-plugin.version>
         <surefire-plugin.version>3.5.6</surefire-plugin.version>
-        <jacoco.version>0.8.14</jacoco.version>
+        <jacoco.version>0.8.15</jacoco.version>
         <spotless.version>3.7.0</spotless.version>
         <google-java-format.version>1.27.0</google-java-format.version>
 
